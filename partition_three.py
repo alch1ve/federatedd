@@ -45,7 +45,7 @@ def split_dataset_by_class(dataset_x, dataset_y, num_partitions):
 npz_path = r"C:\Users\aldri\federatedd\dataset\CpE_Faculty_Members.npz"
 
 # Load dataset
-x_train, x_test, y_train, y_test = dataset.load_dataset_from_npz(npz_path, test_size=0.2)
+x_train, x_test, y_train, y_test = dataset.load_dataset_evaluate(npz_path, test_size=0.2)
 
 # Encode labels as integers if needed
 from sklearn.preprocessing import LabelEncoder
@@ -53,7 +53,7 @@ label_encoder = LabelEncoder()
 y_train_encoded = label_encoder.fit_transform(y_train)
 
 # Split the dataset into three partitions by class labels
-partition_data = split_dataset_by_class(x_train, y_train_encoded, 3)
+partition_data = split_dataset_by_class(x_train, y_train_encoded, 2)
 
 # Save each partition to a separate file
 for i, (x_partition, y_partition) in enumerate(partition_data):
