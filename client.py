@@ -10,7 +10,7 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Define the base path to your dataset
-dataset_base_path = r"C:\Users\aldri\federated\dataset\cpe_faculty"
+dataset_base_path = r"C:\Users\dgzhi\OneDrive\Desktop\Federated\dataset\cpe_faculty"
 
 # Load dataset
 x_train, x_test, y_train, y_test = dataset.load_dataset(dataset_base_path, test_size=0.2)
@@ -87,6 +87,7 @@ app = ClientApp(
 
 # Legacy mode
 if __name__ == "__main__":
+    from flwr.client import start_client
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--client_id", type=str, help="Client ID")
