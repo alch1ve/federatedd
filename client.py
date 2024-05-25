@@ -68,10 +68,9 @@ class FlowerClient(NumPyClient):
         loss, accuracy = self.model.evaluate(self.x_val, self.y_val)
         return loss, len(self.x_val), {"accuracy": accuracy}
 
-def client_fn(cid: str):
+def client_fn(cid: str, partition_id: int):
     """Create and return an instance of Flower `Client`."""
-    # Load the partitioned data based on the client id
-    partition_id = int(cid) % 2  # Assuming there are 2 partitions
+    # Load the partitioned data based on the partition ID
     x_partition, y_partition = train_partitions[partition_id]
     x_val, y_val = test_partitions[partition_id]
     # Create model instance for the client
@@ -88,9 +87,14 @@ app = ClientApp(
 
 # Legacy mode
 if __name__ == "__main__":
-    from flwr.client import start_client
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--client_id", type=str, help="Client ID")
+    parser.add_argument("--partition_id", type=int, help="Partition ID")
+    args = parser.parse_args()
 
     start_client(
-        server_address="127.0.0.1:8080",
-        client=client_fn("0"),  # Initial call with client ID 0 for example
+        server_address="192.168.1.10:8080",
+        client=client_fn(args.client_id, args.partition_id), 
     )
+
