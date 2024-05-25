@@ -1,38 +1,56 @@
 from typing import List, Tuple
-import argparse
-import numpy as np
-import tensorflow as tf
 from flwr.server import ServerApp, ServerConfig
-from flwr.server.strategy import FedAvg
-from flwr.common import Metrics, Weights
-import dataset
-import model as model_module
+from flwr.common import Metrics
+import flwr as fl
+from model import create_model
+
+
+class CustomFedAvg(fl.server.strategy.FedAvg):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.global_model = create_model(512, 11)  # Update input_shape and num_classes accordingly
+        self.num_rounds = kwargs.get('num_rounds', 3)  # Default to 5 if not provided
+
+    def aggregate_fit(self, rnd, results, failures):
+        # Aggregate parameters and metrics
+        aggregated_parameters, aggregated_metrics = super().aggregate_fit(rnd, results, failures)
+        
+        # Save model if it's the final round
+        if rnd == self.num_rounds:
+            self.save_model(aggregated_parameters)
+        
+        return aggregated_parameters, aggregated_metrics
+
+    def save_model(self, parameters):
+        # Extract the actual weights from the Parameters object
+        weights = fl.common.parameters_to_ndarrays(parameters)
+        self.global_model.set_weights(weights)
+        self.global_model.save("C:/Users/aldri/federatedd/model/final_global_model.h5")
+        print("Model saved as final_global_model.h5")
+
+    def aggregate_evaluate(self, rnd, results, failures):
+        aggregated = super().aggregate_evaluate(rnd, results, failures)
+        accuracies = [res[1].metrics['accuracy'] for res in results if res[1].metrics is not None]
+        if accuracies:
+            average_accuracy = sum(accuracies) / len(accuracies)
+            print(f"Round {rnd}: Average accuracy: {average_accuracy:.3f}")
+        else:
+            print(f"Round {rnd}: No accuracies to average.")
+        return aggregated
 
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    # Multiply accuracy of each client by number of examples used
     accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
     examples = [num_examples for num_examples, _ in metrics]
-
-    # Aggregate and return custom metric (weighted average)
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-# Define initial model training function
-def train_initial_model(x_train, y_train, input_shape, num_classes, initial_epochs=3, batch_size=32):
-    model = model_module.create_model(input_shape, num_classes)
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    model.fit(x_train, y_train, epochs=initial_epochs, batch_size=batch_size)
-    return model.get_weights()
-
+# Define strategy
+strategy = CustomFedAvg(evaluate_metrics_aggregation_fn=weighted_average)
 
 # Define config
 config = ServerConfig(num_rounds=3)
-
-# Define strategy
-strategy = FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
-
 
 # Flower ServerApp
 app = ServerApp(
@@ -40,24 +58,12 @@ app = ServerApp(
     strategy=strategy,
 )
 
-
 # Legacy mode
 if __name__ == "__main__":
     from flwr.server import start_server
 
-    # Load the dataset
-    npz_path = r"C:\Users\aldri\federatedd\dataset\CpE_Faculty_Members.npz"
-    x_train, _, y_train, _ = dataset.load_dataset_from_npz(npz_path, test_size=0.2)
-    num_classes = len(np.unique(y_train))  # Number of unique classes (i.e., number of persons)
-    input_shape = x_train.shape[1]  # Number of features
-
-    # Train initial model
-    initial_model_weights = train_initial_model(x_train, y_train, input_shape, num_classes)
-
-    # Start server with initial model weights
     start_server(
         server_address="0.0.0.0:8080",
         config=config,
         strategy=strategy,
-        initial_model=Weights(initial_model_weights),
     )

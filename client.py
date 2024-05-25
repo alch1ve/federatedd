@@ -45,7 +45,6 @@ print("Testing partition 0 labels:", np.unique(test_partitions[0][1], return_cou
 print("Testing partition 1 labels:", np.unique(test_partitions[1][1], return_counts=True))
 
 
-
 # Define Flower client
 class FlowerClient(NumPyClient):
     def __init__(self, x_train, y_train, x_val, y_val, model):
@@ -87,7 +86,6 @@ def client_fn(cid: str, partition_id: int):
     dense_model = model_module.create_model(input_shape, num_classes)
     dense_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return FlowerClient(x_partition, y_partition, x_val, y_val, dense_model).to_client()
-
 
 
 # Flower ClientApp
