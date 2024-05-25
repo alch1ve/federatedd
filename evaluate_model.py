@@ -8,7 +8,7 @@ from model import create_model
 model_path = "C:/Users/aldri/federatedd/model/final_global_model.h5"
 
 # Path to your .npz dataset
-npz_path = r"C:\Users\aldri\federatedd\partitions\partition_1.npz"
+npz_path = r"C:\Users\aldri\federatedd\dataset\CpE_Faculty_Members.npz"
 
 # Load dataset
 x_train, x_test, y_train, y_test = dataset.load_dataset_from_npz(npz_path, test_size=0.2)

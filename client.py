@@ -10,16 +10,40 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Define the path to your .npz dataset
-npz_path = r"C:\Users\aldri\federatedd\partitions\partition_2.npz"
+npz_path = r"C:\Users\aldri\federatedd\dataset\CpE_Faculty_Members.npz"
 
 # Load dataset
 x_train, x_test, y_train, y_test = dataset.load_dataset_from_npz(npz_path, test_size=0.2)
 
-# Encode labels as integers
+# Encode labels as integers (this part should be added here if needed)
 from sklearn.preprocessing import LabelEncoder
 label_encoder = LabelEncoder()
-y_train_encoded = label_encoder.fit_transform(y_train)
-y_test_encoded = label_encoder.transform(y_test)
+y_train = label_encoder.fit_transform(y_train)
+y_test = label_encoder.transform(y_test)
+
+# Partition the dataset
+def partition_data(x, y, num_partitions):
+    partition_size = len(x) // num_partitions
+    partitions = []
+    for i in range(num_partitions):
+        start = i * partition_size
+        end = start + partition_size
+        partitions.append((x[start:end], y[start:end]))
+    return partitions
+
+train_partitions = partition_data(x_train, y_train, 2)
+test_partitions = partition_data(x_test, y_test, 2)
+
+# Print dataset shapes after partitioning
+print("Training data shapes after partitioning:", [(x.shape, y.shape) for x, y in train_partitions])
+print("Testing data shapes after partitioning:", [(x.shape, y.shape) for x, y in test_partitions])
+
+# Verify the content of the partitions (optional, for detailed verification)
+print("Training partition 0 labels:", np.unique(train_partitions[0][1], return_counts=True))
+print("Training partition 1 labels:", np.unique(train_partitions[1][1], return_counts=True))
+print("Testing partition 0 labels:", np.unique(test_partitions[0][1], return_counts=True))
+print("Testing partition 1 labels:", np.unique(test_partitions[1][1], return_counts=True))
+
 
 # Define Flower client
 class FlowerClient(NumPyClient):
@@ -53,12 +77,16 @@ class FlowerClient(NumPyClient):
 
 def client_fn(cid: str, partition_id: int):
     """Create and return an instance of Flower `Client`."""
+    # Load the partitioned data based on the partition ID
+    x_partition, y_partition = train_partitions[partition_id]
+    x_val, y_val = test_partitions[partition_id]
     # Create model instance for the client
-    num_classes = len(np.unique(y_train_encoded))  # Number of unique classes (i.e., number of persons)
+    num_classes = len(np.unique(y_train))  # Number of unique classes (i.e., number of persons)
     input_shape = x_train.shape[1]  # Number of features
     dense_model = model_module.create_model(input_shape, num_classes)
     dense_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    return FlowerClient(x_train, y_train_encoded, x_test, y_test_encoded, dense_model).to_client()
+    return FlowerClient(x_partition, y_partition, x_val, y_val, dense_model).to_client()
+
 
 # Flower ClientApp
 app = ClientApp(
