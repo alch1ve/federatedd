@@ -89,6 +89,7 @@ app = ClientApp(
 if __name__ == "__main__":
     from flwr.client import start_client
     import argparse
+    from flwr.client import start_client
     parser = argparse.ArgumentParser()
     parser.add_argument("--client_id", type=str, help="Client ID")
     parser.add_argument("--partition_id", type=int, help="Partition ID")

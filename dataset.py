@@ -15,6 +15,7 @@ def load_images_from_directory(directory, label, img_size=(32, 32)):
             labels.append(label)
     return images, labels
 
+
 def load_dataset(base_path, test_size=0.2):
     classes = os.listdir(base_path)
     images = []
