@@ -10,10 +10,11 @@ import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Define the base path to your dataset
-dataset_base_path = r"C:\Users\aldri\federated\dataset\cpe_faculty"
+dataset_base_path = r"C:\Users\aldri\federatedd\dataset\CpE_Faculty_Members.npz"
 
 # Load dataset
-x_train, x_test, y_train, y_test = dataset.load_dataset(dataset_base_path, test_size=0.2)
+x_train, x_test, y_train, y_test = dataset.load_dataset_npz(dataset_base_path, test_size=0.2)
+
 
 # Partition the dataset
 def partition_data(x, y, num_partitions):
@@ -88,6 +89,7 @@ app = ClientApp(
 # Legacy mode
 if __name__ == "__main__":
     import argparse
+    from flwr.client import start_client
     parser = argparse.ArgumentParser()
     parser.add_argument("--client_id", type=str, help="Client ID")
     parser.add_argument("--partition_id", type=int, help="Partition ID")
