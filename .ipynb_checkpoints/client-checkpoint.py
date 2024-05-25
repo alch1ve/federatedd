@@ -44,8 +44,6 @@ print("Training partition 1 labels:", np.unique(train_partitions[1][1], return_c
 print("Testing partition 0 labels:", np.unique(test_partitions[0][1], return_counts=True))
 print("Testing partition 1 labels:", np.unique(test_partitions[1][1], return_counts=True))
 
-
-
 # Define Flower client
 class FlowerClient(NumPyClient):
     def __init__(self, x_train, y_train, x_val, y_val, model):
