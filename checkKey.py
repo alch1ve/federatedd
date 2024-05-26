@@ -1,22 +1,25 @@
 import numpy as np
 
 # Load the .npz file
-file_path = "C:/Users/aldri/federatedd/partitions/partition_1.npz"
+file_path = "C:/Users/aldri/federatedd/dataset/Class_1.npz"
 data = np.load(file_path)
 
 # List all the arrays stored in the .npz file
 array_names = data.files
 print("Keys of arrays in the .npz file:", array_names)
 
-# Display the shape of the .npz file
-print("Shape of the .npz file:", np.shape(data))
+# Specify the keys for y_train and y_test
+y_train_key = 'y_train'  # Update this key if it's different
+y_test_key = 'y_test'    # Update this key if it's different
 
-# Specify the key of the array whose shape you want to know
-desired_key = input("Enter the key of the array whose shape you want to know: ")
+# Check if the specified keys exist in the .npz file
+if y_train_key in array_names and y_test_key in array_names:
+    # Access the arrays
+    y_train = data[y_train_key]
+    y_test = data[y_test_key]
 
-# Check if the specified key exists in the .npz file
-if desired_key in array_names:
-    array_shape = data[desired_key].shape
-    print("Shape of the array {}: {}".format(desired_key, array_shape))
+    # Print the labels
+    print("y_train labels:", y_train)
+    print("y_test labels:", y_test)
 else:
-    print("The specified key does not exist in the .npz file.")
+    print("The specified keys do not exist in the .npz file.")
