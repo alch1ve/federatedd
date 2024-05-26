@@ -6,6 +6,10 @@ from mtcnn import MTCNN
 from sklearn.preprocessing import LabelEncoder
 import dataset
 
+
+#lmao
+
+
 # Load the saved model
 saved_model_path = "C:/Users/aldri/federatedd/model/final_global_model.h5"
 loaded_model = tf.keras.models.load_model(saved_model_path)
