@@ -8,7 +8,7 @@ from model import create_model
 class CustomFedAvg(fl.server.strategy.FedAvg):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.global_model = create_model(512, 11)  # Update input_shape and num_classes accordingly
+        self.global_model = create_model(512, 3)  # Update input_shape and num_classes accordingly
         self.num_rounds = kwargs.get('num_rounds', 3)  # Default to 5 if not provided
 
     def aggregate_fit(self, rnd, results, failures):
