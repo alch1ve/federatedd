@@ -52,12 +52,12 @@ class FlowerClient(NumPyClient):
         
         # Save the model at the end of round 1, 2, and 3
         if self.round_counter in [1, 2, 3]:
-            filename = f'model_checkpoint_round_{self.round_counter}.h5'
+            filename = f'model_checkpoint_round_{self.round_counter}'
             self.model.save(os.path.join(self.save_dir, filename))
         
         # Save as final_local_model after the last round
         if self.round_counter == 3:
-            self.model.save(os.path.join(self.save_dir, 'final_local_model.h5'))
+            self.model.save(os.path.join(self.save_dir, 'final_local_model'))
         
         return self.model.get_weights(), len(self.x_train), {}
 

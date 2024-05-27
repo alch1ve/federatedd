@@ -25,13 +25,13 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
         # Extract the actual weights from the Parameters object
         weights = fl.common.parameters_to_ndarrays(parameters)
         self.global_model.set_weights(weights)
-        filename = f"C:/Users/aldri/federatedd/global model/global_model_round_{rnd}.h5"
+        filename = f"C:/Users/aldri/federatedd/global model/global_model_round_{rnd}"
         self.global_model.save(filename)
         print(f"Global model saved as {filename}")
         
         # Save as final_local_model after the final round
         if rnd == self.num_rounds:
-            final_filename = "C:/Users/aldri/federatedd/global model/final_global_model.h5"
+            final_filename = "C:/Users/aldri/federatedd/global model/final_global_model"
             self.global_model.save(final_filename)
             print(f"Final global model saved as {final_filename}")
 

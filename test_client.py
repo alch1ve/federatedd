@@ -1,22 +1,42 @@
 import tensorflow as tf
-import numpy as np
-import cv2 as cv
-from keras_facenet import FaceNet
-from mtcnn import MTCNN
+import dataset
 from sklearn.preprocessing import LabelEncoder
 
 # Load the saved model
-saved_model_path = "C:/Users/aldri/federatedd/model/final_global_model.h5"
+saved_model_path = "C:/Users/aldri/federatedd/local model/client_1_local_model.h5"
 loaded_model = tf.keras.models.load_model(saved_model_path)
 
 # Compile the model (ensure the compile configuration matches the one used during training)
-loaded_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+loaded_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+
+# Load the test dataset
+npz_path = r"C:\Users\aldri\federatedd\dataset\Client_1.npz"
+x_train, x_test, y_train, y_test = dataset.load_dataset_from_npz(npz_path, test_size=0.2)
+
+# Encode labels if necessary (same as in client.py)
+label_encoder = LabelEncoder()
+y_test_encoded = label_encoder.fit_transform(y_test)
+y_test_encoded = tf.keras.utils.to_categorical(y_test_encoded, num_classes=5)  # Convert to one-hot encoding
+
+# Evaluate the model on the test data
+loss, accuracy = loaded_model.evaluate(x_test, y_test_encoded)
+
+print("Test Loss:", loss)
+print("Test Accuracy:", accuracy)
+
+loaded_model.summary()
+
+import cv2 as cv
+import numpy as np
+from keras_facenet import FaceNet
+from mtcnn import MTCNN
 
 # Initialize FaceNet model
 embedder = FaceNet()
 
 # Load the single image
-image_path = "C:/Users/aldri/Downloads/Princess_Cyril_Malabanan/77e700aa-d9e3-4590-b5c6-d8bf65153389.jpg"
+image_path = "C:/Users/aldri/Downloads/Princess_Cyril_Malabanan/308658212_5473776586063406_701842605920844947_n.jpg"
 image = cv.imread(image_path)
 image_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
