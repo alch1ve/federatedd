@@ -21,28 +21,24 @@ y_test = label_encoder.transform(y_test)
 
 # Define Flower client
 class FlowerClient(NumPyClient):
-    def __init__(self, x_train, y_train, x_val, y_val, model, global_num_classes):
+    def __init__(self, x_train, y_train, x_val, y_val, model, num_classes):
         super().__init__()
         self.x_train = x_train
         self.y_train = y_train
         self.x_val = x_val
         self.y_val = y_val
         self.model = model
-        self.global_num_classes = global_num_classes
+        self.num_classes = num_classes
 
     def get_parameters(self, config):
         return self.model.get_weights()
 
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
-        # One-hot encode the labels to match the global model's output shape
-        y_train_global = tf.keras.utils.to_categorical(self.y_train, self.global_num_classes)
-        y_val_global = tf.keras.utils.to_categorical(self.y_val, self.global_num_classes)
-        
         self.model.fit(
             self.x_train,
-            y_train_global,
-            validation_data=(self.x_val, y_val_global),
+            self.y_train,
+            validation_data=(self.x_val, self.y_val),
             epochs=10,
             batch_size=32,
             callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=2)]
@@ -51,18 +47,15 @@ class FlowerClient(NumPyClient):
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
-        y_val_global = tf.keras.utils.to_categorical(self.y_val, self.global_num_classes)
-        loss, accuracy = self.model.evaluate(self.x_val, y_val_global)
+        loss, accuracy = self.model.evaluate(self.x_val, self.y_val)
         return loss, len(self.x_val), {"accuracy": accuracy}
 
 def client_fn(cid: str):
-    # Define number of classes for the global model
-    global_num_classes = 6
-    num_classes = len(np.unique(y_train))  # Local number of classes (3 in this case)
+    num_classes = len(np.unique(y_train))
     input_shape = x_train.shape[1]
-    model = model_module.create_model(input_shape, global_num_classes)  # Global model with 6 classes
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-    return FlowerClient(x_train, y_train, x_test, y_test, model, global_num_classes).to_client()
+    model = model_module.create_model(input_shape, num_classes)
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    return FlowerClient(x_train, y_train, x_test, y_test, model, num_classes).to_client()
 
 # Flower ClientApp
 app = ClientApp(client_fn=client_fn)
