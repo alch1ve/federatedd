@@ -8,7 +8,7 @@ from model import create_model
 class CustomFedAvg(fl.server.strategy.FedAvg):
     def __init__(self, save_path=None, **kwargs):
         super().__init__(**kwargs)
-        self.global_model = create_model(512, 6)
+        self.global_model = None
         self.num_rounds = kwargs.get('num_rounds', 3)
         self.save_path = save_path
 
@@ -45,14 +45,21 @@ class CustomFedAvg(fl.server.strategy.FedAvg):
             # Save the global model after the final round
             if self.global_model is not None:  # Check if global model is initialized
                 print("Saving final global model...")
-                self.save_model()
+                self.save_model(aggregated_parameters)
             else:
                 print("Global model is not initialized!")
         return aggregated_parameters, aggregated_metrics
 
 
-    def aggregate_evaluate(self, rnd: int, results: List[Tuple[str, EvaluateRes]], failures: List[BaseException]) -> Metrics:
-        return super().aggregate_evaluate(rnd, results, failures)
+    def aggregate_evaluate(self, rnd, results, failures):
+        aggregated = super().aggregate_evaluate(rnd, results, failures)
+        accuracies = [res[1].metrics['accuracy'] for res in results if res[1].metrics is not None]
+        if accuracies:
+            average_accuracy = sum(accuracies) / len(accuracies)
+            print(f"Round {rnd}: Average accuracy: {average_accuracy:.3f}")
+        else:
+            print(f"Round {rnd}: No accuracies to average.")
+        return aggregated
 
     def save_model(self):
         if self.save_path is not None:
