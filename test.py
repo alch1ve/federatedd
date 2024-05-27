@@ -11,13 +11,13 @@ loaded_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=
 
 
 # Load the test dataset
-npz_path = r"C:\Users\aldri\federatedd\dataset\test_all.npz"
+npz_path = r"C:\Users\aldri\federatedd\dataset\Client_1.npz"
 x_train, x_test, y_train, y_test = dataset.load_dataset_from_npz(npz_path, test_size=0.2)
 
 # Encode labels if necessary (same as in client.py)
 label_encoder = LabelEncoder()
 y_test_encoded = label_encoder.fit_transform(y_test)
-y_test_encoded = tf.keras.utils.to_categorical(y_test_encoded, num_classes=6)  # Convert to one-hot encoding
+y_test_encoded = tf.keras.utils.to_categorical(y_test_encoded, num_classes=5)  # Convert to one-hot encoding
 
 # Evaluate the model on the test data
 loss, accuracy = loaded_model.evaluate(x_test, y_test_encoded)
