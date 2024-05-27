@@ -36,11 +36,11 @@ from mtcnn import MTCNN
 embedder = FaceNet()
 
 # Load the single image
-image_path = "C:/Users/aldri/OneDrive/Pictures/Screenshots/Screenshot 2024-05-26 121439.png"
+image_path = "C:/Users/aldri/Downloads/Princess_Cyril_Malabanan/308658212_5473776586063406_701842605920844947_n.jpg"
 image = cv.imread(image_path)
 image_rgb = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
-# Detect faces in the image using MTCNN or any other face detection algorithm
+# Detect faces in the image using MTCNN
 detector = MTCNN()
 faces = detector.detect_faces(image_rgb)
 
@@ -55,28 +55,24 @@ if faces:
     # Resize the cropped face to match the input shape expected by FaceNet
     resized_face = cv.resize(cropped_face, (160, 160))
     
-    # Normalize the image to match FaceNet's expected input format
-    resized_face = np.around(resized_face / 255.0, decimals=12)
-
     # Generate embedding for the resized face using FaceNet
-    embedding = embedder.embeddings([resized_face])[0]  # Assuming embedder.embeddings() expects a batch of images
+    embedding = embedder.embeddings([resized_face])[0]  # FaceNet expects a batch of images
     
-    # Ensure the embedding is in the correct shape
-    input_data = np.expand_dims(embedding, axis=0)  # Shape should be (1, embedding_size)
-    labels_npz = np.load(npz_path)
-    labels = labels_npz
+    # Reshape the embedding to match the input shape expected by the loaded model
+    input_data = np.expand_dims(embedding, axis=0)
+    
     # Make predictions using the loaded model
     predictions = loaded_model.predict(input_data)
     
-    # Get the predicted class label
-    predicted_class = np.argmax(predictions)
-    labels = labels_npz['arr_1']  # Assuming labels are stored in 'arr_1'
+    # Get the predicted class index
+    predicted_class_index = np.argmax(predictions)
+    
+    # Decode the predicted class index to get the class name
+    # Decode the predicted class index to get the class name
+    predicted_class_name = label_encoder.inverse_transform(predicted_class_index.reshape(1))[0]
 
-# Assuming you have already obtained the predicted class index
-predicted_class_index = predicted_class
-
-# Get the label corresponding to the predicted class index
-predicted_label = labels[predicted_class_index]
-
-# Print the predicted label
-print("Predicted Label:", predicted_label)
+    
+    # Print the predicted class name
+    print("Predicted Class:", predicted_class_name)
+else:
+    print("No faces detected in the image.")
