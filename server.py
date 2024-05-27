@@ -48,7 +48,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # Define strategy
-strategy = CustomFedAvg(evaluate_metrics_aggregation_fn=weighted_average)
+strategy = CustomFedAvg(evaluate_metrics_aggregation_fn=weighted_average,min_available_clients=3,min_fit_clients=3)
 
 # Define config
 config = ServerConfig(num_rounds=3)
