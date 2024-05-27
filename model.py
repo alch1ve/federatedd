@@ -1,6 +1,9 @@
+
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout
+
+#FNN
 
 def create_model(input_shape, num_classes):
     model = Sequential([
@@ -13,3 +16,4 @@ def create_model(input_shape, num_classes):
         Dense(num_classes, activation='softmax')
     ])
     return model
+

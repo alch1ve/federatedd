@@ -1,13 +1,12 @@
-
 import argparse
 import numpy as np
 from flwr.client import ClientApp, NumPyClient
 import tensorflow as tf
 import dataset
 import model as model_module
+import os
 
 # Make TensorFlow log less verbose
-import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Define the path to your .npz dataset
@@ -31,12 +30,17 @@ class FlowerClient(NumPyClient):
         self.x_val = x_val
         self.y_val = y_val
         self.model = model
+        self.round_counter = 0  # Initialize the round counter
+        self.save_dir = "C:/Users/aldri/federatedd/local model/"
 
     def get_parameters(self, config):
         return self.model.get_weights()
 
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
+        self.round_counter += 1  # Increment round counter
+        
+        # Train the model
         self.model.fit(
             self.x_train,
             self.y_train,
@@ -45,6 +49,16 @@ class FlowerClient(NumPyClient):
             batch_size=32,
             callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=2)]
         )
+        
+        # Save the model at the end of round 1, 2, and 3
+        if self.round_counter in [1, 2, 3]:
+            filename = f'model_checkpoint_round_{self.round_counter}.h5'
+            self.model.save(os.path.join(self.save_dir, filename))
+        
+        # Save as final_local_model after the last round
+        if self.round_counter == 3:
+            self.model.save(os.path.join(self.save_dir, 'final_local_model.h5'))
+        
         return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
@@ -77,7 +91,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_client(
-        server_address="172.16.197.173:8080",
+        server_address="192.168.0.100:8080",
         client=client_fn(args.client_id),
     )
-
