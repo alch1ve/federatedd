@@ -3,7 +3,7 @@ import dataset
 from sklearn.preprocessing import LabelEncoder
 
 # Load the saved model
-saved_model_path = "C:/Users/aldri/federatedd/model/final_global_model.h5"
+saved_model_path = "C:/Users/aldri/federatedd/global model/final_global_model.h5"
 loaded_model = tf.keras.models.load_model(saved_model_path)
 
 # Compile the model (ensure the compile configuration matches the one used during training)
