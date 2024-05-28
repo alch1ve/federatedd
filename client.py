@@ -50,14 +50,10 @@ class FlowerClient(NumPyClient):
             callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=2)]
         )
         
-        # Save the model at the end of round 1, 2, and 3
-        if self.round_counter in [1, 2, 3]:
-            filename = f'model_checkpoint_round_{self.round_counter}'
-            self.model.save(os.path.join(self.save_dir, filename))
-        
+   
         # Save as final_local_model after the last round
         if self.round_counter == 3:
-            self.model.save(os.path.join(self.save_dir, 'final_local_model'))
+            self.model.save(os.path.join(self.save_dir, 'final_local_model.keras'))
         
         return self.model.get_weights(), len(self.x_train), {}
 
@@ -91,6 +87,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_client(
-        server_address="192.168.0.100:8080",
+        server_address="172.16.197.173:8080",
         client=client_fn(args.client_id),
     )
