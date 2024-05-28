@@ -10,7 +10,7 @@ from mtcnn import MTCNN
 import dataset
 
 # Load the saved model
-saved_model_path = "C:/Users/aldri/federatedd/global model/final_global_model.keras"
+saved_model_path = "C:/Users/aldri/federatedd/fin/final_global_model.keras"
 loaded_model = tf.keras.models.load_model(saved_model_path)
 loaded_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 

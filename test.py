@@ -11,7 +11,7 @@ loaded_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=
 
 
 # Load the test dataset
-npz_path = r"C:\Users\aldri\federatedd\dataset\Client_1.npz"
+npz_path = r"C:\Users\aldri\federatedd\dataset\Client_2.npz"
 x_train, x_test, y_train, y_test = dataset.load_dataset_from_npz(npz_path, test_size=0.2)
 
 # Encode labels if necessary (same as in client.py)
